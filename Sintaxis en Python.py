@@ -146,3 +146,11 @@ df_index.loc[filtro]
 
 #Ordenar el indice 
 df_index.sort_index(level=['Hábitat', 'Orden'], ascending=[True, False])
+
+#Cortar dataframe por indices y columnas 
+df_index = df.set_index(['Hábitat', 'Orden'])
+df_index = df_index.sort_index()
+df_index.loc[('Savannah','Herbívoro'):('Selva','Herbívoro'),'Nombre':'Peso (kg)']
+
+#trabajar con fechas también es facil con index, ya que puedes filtrar por parte de la fecha .loc["2010-08":"2011-02"]
+#Siempre es necesario usar .sort_index()
