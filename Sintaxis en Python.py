@@ -106,6 +106,9 @@ def iqr(column):
     return column.quantile(0.75) - column.quantile(0.25)
 print(df["Peso (lb)"].agg(iqr))
 
+## Funciones de tiempo ##
+temperatures["year"] = temperatures["date"].dt.year
+
 ## Funciones .cumsum()  (Acumulado) y .cummax() (mayor valor en el df) ##
 
 ## Fución .drop_duplicates(subset = ["store","department"]) o vacio para aplicarlo a todo al df ##
