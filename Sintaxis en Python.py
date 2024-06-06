@@ -101,6 +101,9 @@ df_peso = df[df["Peso (lb)"]== 700] #crear un df condicionado
 df = df.sort_values("Peso (lb)", ascending = False) # Ordenar el df de forma descendente
 print(df["Peso (lb)"].max()) #Obtener el peso maximo
 
+## botar columnas
+df = df.drop("Peso (lb)",axis =1)
+
 ## función personalizada ##
 def iqr(column):
     return column.quantile(0.75) - column.quantile(0.25)
@@ -157,3 +160,58 @@ df_index.loc[('Savannah','Herbívoro'):('Selva','Herbívoro'),'Nombre':'Peso (kg
 
 #trabajar con fechas también es facil con index, ya que puedes filtrar por parte de la fecha .loc["2010-08":"2011-02"]
 #Siempre es necesario usar .sort_index()
+
+## Crear columnas condicionales ##
+# Método .loc (no tan recomendado)
+df.loc[df['Peso (kg)']>=1000, "Categoría Peso"] = "Pesado"
+df.loc[(df['Peso (kg)']<1000) & (df['Peso (kg)']>400) , "Categoría Peso"] = "Mediano"
+df.loc[df['Peso (kg)']<= 400, "Categoría Peso"] = "Ligero"
+
+#Método con NumPy (díficil de leer)
+cond = [
+    (df['Peso (kg)']>= 1000),
+    (df['Peso (kg)']<1000) & (df['Peso (kg)']>400),
+    (df['Peso (kg)']<= 400)
+]
+val = ["Pesado","Mediano","Ligero"]
+df["Categoría Peso"] = np.select(cond,val)
+
+# Map y apply 
+def categorizar_peso(peso):
+    if peso >= 1000:
+        return "Pesado"
+    elif 400 < peso < 1000:
+        return "Mediano"
+    else:
+        return "Ligero"
+df['Categoría Peso'] = df['Peso (kg)'].map(categorizar_peso).fillna("-")
+df['Categoría Peso'] = df['Peso (kg)'].apply(categorizar_peso).fillna("-")
+
+# Columna Condicionada
+df['Categoría Peso'] =  ["Pesado" if i >= 1000 else "Mediano" if i < 1000 and i > 400 else "Ligero" for i in df['Peso (kg)']  ]
+
+
+## Concat y Merge ##
+df = df.merge(equivalencia, on = ["col1","col2"], how= left)
+df_consolidado = pd.concat([df_consolidado , df], ignore_index = True)
+
+## Modificar el Nombre de una columna ## 
+#Modificar una columna
+df.rename(columns={'Nombre': 'Especie'}, inplace=True)
+
+#Modificar todas las columnas
+nuevos_nombres = ['Habitat', 'Order', 'Species', 'Weight (kg)']
+df.columns = nuevos_nombres
+
+## Modificar el orden del df ##
+#manual 
+nuevo_orden = ['Nombre', 'Hábitat', 'Orden', 'Peso (kg)']
+df = df[nuevo_orden]
+
+#Elegir la primera columna
+nuevo_orden = [columna_principio] + [col for col in df.columns if col != columna_principio]
+df = df[nuevo_orden]
+
+# Definir las ultimas columnas
+nuevo_orden = [col for col in df.columns if col != columna_final] + [columna_final]
+df = df[nuevo_orden]
